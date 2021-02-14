@@ -8,7 +8,7 @@ const store = [
   {
     name: "outside",
     color: "lightpink",
-    position: [10, 0, -15],
+    position: [10, 0, -1],
     url: "/360_1.jpg",
     link: 1,
   },
@@ -32,21 +32,6 @@ function Dome({ name, position, texture, onClick }) {
       <mesh position={position}>
         <sphereGeometry args={[1.25, 32, 32]} />
         <meshBasicMaterial color="white" />
-        <Html center>
-          {/* <Popconfirm
-            title="Are you sure you want to leave?"
-            onConfirm={onClick}
-            okText="Yes"
-            cancelText="No"
-          > */}
-          <a herf="#" onClick={onClick}>
-            {name}
-          </a>
-          <a herf="#" onClick={onClick}>
-            {name}
-          </a>
-          {/* </Popconfirm> */}
-        </Html>
       </mesh>
     </group>
   );
@@ -62,6 +47,26 @@ function Portals() {
   return <Dome onClick={() => set(link)} {...props} texture={maps[which]} />;
 }
 
+function MovableShizz() {
+  const ref = useRef();
+  const [position, setPosition] = useState([0, 0, 0]);
+  const { size, viewport } = useThree();
+  const aspect = size.width / viewport.width;
+  const bind = useDrag(
+    ({ offset: [x, y] }) => {
+      const [, , z] = position;
+      setPosition([x / aspect, -y / aspect, z]);
+    },
+    { pointerEvents: true }
+  );
+  return (
+    <mesh position={position} {...bind()} ref={ref}>
+      <dodecahedronBufferGeometry attach="geometry" />
+      <meshLambertMaterial attach="material" />
+    </mesh>
+  );
+}
+
 function Preload() {
   // This component pre-loads textures in order to lessen loading impact when clicking portals
   const { gl } = useThree();
@@ -75,9 +80,9 @@ function Preload() {
 
 function App() {
   return (
-    <Canvas invalidateFrameloop concurrent camera={{ position: [0, 0, 0.1] }}>
+    <Canvas invalidateFrameloop concurrent camera={{ position: [0, 0, 1] }}>
       <OrbitControls
-        enableZoom={false}
+        enableZoom={true}
         enablePan={false}
         enableDamping
         dampingFactor={0.2}
